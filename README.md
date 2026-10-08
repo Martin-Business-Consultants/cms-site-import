@@ -1,6 +1,6 @@
 # LibrePublish Import
 
-A plugin for the CMS (see `docs/plugins.md` in [opencms](https://github.com/Martin-Business-Consultants/opencms))
+A plugin for the CMS (see `docs/plugins.md` in [LibrePublish CMS](https://github.com/Martin-Business-Consultants/cmsv2))
 that brings a site over from the old shared LibrePublish deployment: one
 button, and this install becomes that site.
 
