@@ -1,0 +1,6 @@
+<%# locals: (run:) %>
+<% shown = if run.active? then run.status == "queued" ? "queued" : "running"
+           elsif SiteImport::Run::ACTIVE.include?(run.status) then "stopped"
+           else run.status
+           end %>
+<%= status_tag shown %>

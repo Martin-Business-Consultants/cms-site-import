@@ -1,0 +1,48 @@
+<% @page_title = "LibrePublish Import" %>
+
+<%= render "layouts/shared/page_header", title: @page_title %>
+
+<%# While it runs the page reloads itself (refresh); the server leaves the
+    controller off once it has finished. %>
+<%= tag.div class: "max-w-3xl space-y-6", data: ({ controller: "refresh", refresh_interval_value: 5 } if @run.active?) do %>
+  <section class="<%= ui(:panel, "space-y-4 p-6") %>">
+    <div class="flex items-center justify-between gap-4">
+      <h2 class="<%= ui(:heading) %>">Import from <%= @run.source %></h2>
+      <%= render "site_import/runs/status", run: @run %>
+    </div>
+    <p class="text-sm text-gray-500">
+      Started <%= time_ago_tag @run.created_at %><% if @run.requested_by %> by <%= @run.requested_by %><% end %>.
+      <% if @run.finished_at %>Finished <%= time_ago_tag @run.finished_at %>.<% end %>
+    </p>
+
+    <% case @run.status %>
+    <% when "queued", "fetching", "importing" %>
+      <p class="text-sm text-gray-700">
+        <% if @run.active? %>
+          <%= @run.status == "fetching" ? "Fetching the backup from the old site." : "Importing." %>
+          This page checks every few seconds. Don’t edit anything meanwhile: it’s about to be replaced. When it’s done the
+          CMS restarts and signs everyone out; sign back in with your account from the old site and come back here for
+          the report.
+        <% else %>
+          It stopped without finishing (the CMS was restarted mid-way). Start it again.
+        <% end %>
+      </p>
+    <% when "succeeded" %>
+      <p class="text-sm text-gray-700">
+        Done: this install is the old site now. Check the report below for files the old site couldn’t find and values
+        this install couldn’t decrypt.
+      </p>
+    <% when "failed" %>
+      <div class="<%= ui(:notice, :red) %>" role="alert"><p><%= @run.error %></p></div>
+    <% end %>
+  </section>
+
+  <% if @run.log.present? %>
+    <section class="<%= ui(:panel, "space-y-3 p-6") %>">
+      <h2 class="<%= ui(:heading) %>">Report</h2>
+      <pre class="<%= settings_code_classes("max-h-[32rem] overflow-auto") %>"><code><%= @run.log %></code></pre>
+    </section>
+  <% end %>
+
+  <p class="text-sm"><%= link_to "All imports", site_import_runs_path, class: ui(:link) %></p>
+<% end %>

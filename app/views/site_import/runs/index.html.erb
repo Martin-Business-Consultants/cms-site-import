@@ -1,0 +1,86 @@
+<% @page_title = "LibrePublish Import" %>
+
+<%= render "layouts/shared/page_header", title: @page_title,
+      description: "Bring a site over from the old shared LibrePublish deployment. This install becomes that site." %>
+
+<div class="max-w-3xl space-y-6">
+  <div class="<%= ui(:notice, :yellow) %>" role="note">
+    <div class="space-y-1">
+      <p class="font-medium">An import replaces everything here.</p>
+      <p>
+        Pages, collections, globals, media, settings and users all become the old site’s. This install’s current
+        database is kept beside the new one, not deleted. When it’s done the CMS restarts and everyone is signed out:
+        sign back in with your account from the old site.
+      </p>
+    </div>
+  </div>
+
+  <% if (active = SiteImport::Run.active) %>
+    <section class="<%= ui(:panel, "space-y-2 p-6") %>">
+      <h2 class="<%= ui(:heading) %>">An import is running</h2>
+      <p class="text-sm text-gray-700"><%= link_to "Follow it", site_import_run_path(active), class: ui(:link) %>.</p>
+    </section>
+  <% else %>
+    <%= form_with url: site_import_runs_path, multipart: true, class: "space-y-6" do |form| %>
+      <section class="<%= ui(:panel, "space-y-4 p-6") %>">
+        <div class="space-y-1">
+          <h2 class="<%= ui(:heading) %>">From the old site</h2>
+          <p class="<%= ui(:help) %>">
+            The CMS fetches the backup itself. Best for a site with a large media library: an upload through the
+            browser can be too big for the proxy in front of the CMS.
+          </p>
+        </div>
+        <%= settings_field "Old site’s address", hint: "Where its admin was, like https://acme.librepublish.com." do %>
+          <%= form.url_field :url, class: "w-full", placeholder: "https://acme.librepublish.com", autocomplete: "off" %>
+        <% end %>
+        <%= settings_field "API token", hint: "From the old site: your user’s API token, or a service token whose role can use Tools. It’s used once and not kept." do %>
+          <%= form.password_field :token, class: "w-full", autocomplete: "off" %>
+        <% end %>
+      </section>
+
+      <section class="<%= ui(:panel, "space-y-4 p-6") %>">
+        <div class="space-y-1">
+          <h2 class="<%= ui(:heading) %>">Or from a backup file</h2>
+          <p class="<%= ui(:help) %>">
+            The <code>.tar.gz</code> from the old site’s Tools › Backup (“Backup site”), or <code>cms backup</code>.
+            A file chosen here is used instead of the old site’s address.
+          </p>
+        </div>
+        <%= form.file_field :archive, accept: ".tar.gz,.tgz,application/gzip", class: "block text-sm text-gray-700" %>
+      </section>
+
+      <section class="<%= ui(:panel, "space-y-4 p-6") %>">
+        <label class="flex items-start gap-2 text-sm text-gray-900">
+          <%= form.check_box :confirm, {}, "1", nil %>
+          <span>I understand this replaces everything in this site with the old site’s.</span>
+        </label>
+        <div><button type="submit" class="<%= ui(:button, :destructive) %>">Import site</button></div>
+      </section>
+    <% end %>
+  <% end %>
+
+  <% if @runs.any? %>
+    <section class="<%= ui(:panel, "p-6") %>">
+      <h2 class="<%= ui(:heading, "mb-3") %>">Imports</h2>
+      <table class="<%= ui(:table) %>">
+        <thead>
+          <tr>
+            <th class="<%= ui(:th) %>">Started</th>
+            <th class="<%= ui(:th) %>">From</th>
+            <th class="<%= ui(:th) %>">Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @runs.each do |run| %>
+            <%# herb:key run.id %>
+            <tr>
+              <td class="<%= ui(:td) %>"><%= link_to time_ago_tag(run.created_at), site_import_run_path(run), class: ui(:link) %></td>
+              <td class="<%= ui(:td) %>"><%= run.source %></td>
+              <td class="<%= ui(:td) %>"><%= render "site_import/runs/status", run: run %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </section>
+  <% end %>
+</div>
