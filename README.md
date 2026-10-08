@@ -35,6 +35,10 @@ the backup has been fetched.
 
 Needs CMS 1.0.1 or newer.
 
+In Settings › Plugins, under "Add a plugin", enter
+`Martin-Business-Consultants/cms-site-import` and press Install (a CMS that
+installs plugins from there). Or from the shell:
+
     bin/rails "plugins:install[https://github.com/Martin-Business-Consultants/cms-site-import,v0.1.0]"
 
 or, for a Docker install, add the URL (with `#v0.1.0`) to `CMS_PLUGINS`. Then
